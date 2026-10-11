@@ -1,6 +1,6 @@
 // offline support: page = network first (so updates arrive), image bundles = cache first,
 // book pages = cache first in their own cache, kept across updates (each page is downloaded once, when first opened)
-const V="als-1791740741";
+const V="als-1791742146";
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(V).then(c=>c.addAll(["./","manifest.webmanifest","icon-192.png"])));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!=="als-pages").map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener("fetch",e=>{

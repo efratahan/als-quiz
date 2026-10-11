@@ -117,7 +117,6 @@ details.topics[open] summary::after{content:"▴"}
 #viewer header button{font:inherit;font-size:14px;font-weight:600;padding:7px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 #vbody{flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch}
 #vbody figure{margin:0 0 14px;width:100%}
-#vbody.zoom figure{width:240%}
 #vbody figcaption{font-size:13px;color:var(--muted);padding:0 2px 4px;position:sticky;inset-inline-start:0;width:max-content}
 #vbody img{display:block;width:100%;height:auto;aspect-ratio:1330/953;background:#fff;border:1px solid var(--line);border-radius:8px}
 #vbody figure.hit img{outline:3px solid var(--focus);outline-offset:1px}
@@ -163,13 +162,13 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <section class="card" id="card" aria-live="polite"></section>
 
   <div id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="vtitle">
-    <header><b id="vtitle"></b><button id="vzoom">הגדלה</button><button id="vclose">סגור</button></header>
+    <header><b id="vtitle"></b><button id="vclose">סגור</button></header>
     <div id="vbody"></div>
   </div>
 
   <footer>
     <span id="saved"></span>
-    <span id="ver">גרסה 11.10.2026 20:45</span>
+    <span id="ver">גרסה 11.10.2026 21:09</span>
     <span>פרוטוקולים ותרופות: ספר הפרוטוקולים של אגף הרפואה, אפריל 2024. גודל האמפולות, הקטעים המצולמים והעמודים המלאים מתוך העותק עם ההערות "מגיע", אחרי בדיקה מול תוויות התכשירים. תרופות בית: הרשימה המעודכנת ל־31/10/2020; "צהוב" = מסומן בצהוב ברשימה.</span>
     <span>בכל ספק הספר קובע — מקור ועמוד מופיעים בכל תשובה. בטלפון: תפריט הדפדפן ← "הוספה למסך הבית" כדי לפתוח כמו אפליקציה.</span>
   </footer>
@@ -434,13 +433,10 @@ function pagesFor(d){            // [first, last, cited page, title] of the prot
 }
 function openPages(a, b, focus, title){
   document.getElementById("vtitle").textContent = title + (a===b ? ` · עמ' ${a}` : ` · עמ' ${a}–${b}`);
-  const z = innerWidth < 700;          // on a phone the page opens enlarged, readable without pinching
-  vbody.classList.toggle("zoom", z); document.getElementById("vzoom").textContent = z ? "הקטנה" : "הגדלה";
   let h = "";
   for (let p=a; p<=b; p++) h += `<figure id="pg${p}" class="${p===focus&&a!==b?"hit":""}"><figcaption>עמ' ${p}</figcaption><img ${p===focus||p===a?"":'loading="lazy"'} ${PAGEBUNDLE ? `data-pg="${p}"` : `src="${PAGEBASE}p-${String(p).padStart(3,"0")}.jpg"`} alt="עמוד ${p} בספר"></figure>`;
   vbody.innerHTML = h;
-  vbody.querySelectorAll("img").forEach(im=>{ im.onerror = () => { im.outerHTML = '<div class="verr">העמוד לא נטען — צריך חיבור לאינטרנט בפעם הראשונה שפותחים עמוד.</div>'; };
-    im.onclick = toggleZoom; });
+  vbody.querySelectorAll("img").forEach(im=>{ im.onerror = () => { im.outerHTML = '<div class="verr">העמוד לא נטען — צריך חיבור לאינטרנט בפעם הראשונה שפותחים עמוד.</div>'; }; });
   if (PAGEBUNDLE) vbody.querySelectorAll("img[data-pg]").forEach(im=>{ const p = im.dataset.pg; pbundle(Math.floor((p-1)/10)).then(m=>{ if (m[p]) im.src = m[p]; else im.onerror(); }); });
   viewer.hidden = false; document.body.style.overflow = "hidden";
   try { history.pushState({v:1}, ""); } catch(e){}
@@ -448,16 +444,10 @@ function openPages(a, b, focus, title){
   if (focus && focus!==a){ const f = document.getElementById("pg"+focus); if (f) f.scrollIntoView(); }
   document.getElementById("vclose").focus({preventScroll:true});
 }
-function toggleZoom(){
-  const z = vbody.classList.toggle("zoom"), top = vbody.scrollTop, hgt = vbody.scrollHeight;
-  document.getElementById("vzoom").textContent = z ? "הקטנה" : "הגדלה";
-  requestAnimationFrame(()=>{ vbody.scrollTop = top * vbody.scrollHeight / (hgt||1); });
-}
 function hideViewer(){ viewer.hidden = true; vbody.innerHTML = ""; document.body.style.overflow = ""; }
 function closeViewer(){ if (viewer.hidden) return; if (history.state && history.state.v) history.back(); else hideViewer(); }
 window.addEventListener("popstate", hideViewer);
 document.getElementById("vclose").onclick = closeViewer;
-document.getElementById("vzoom").onclick = toggleZoom;
 function curProt(){ const t = topicOf(); return part==="prot" && t.startsWith("t:") ? [t.slice(2), (PAGES.prot||{})[t.slice(2)]] : [null, null]; }
 function showRead(){ document.getElementById("readprot").hidden = !curProt()[1]; }
 document.getElementById("readprot").onclick = () => { const [k,r] = curProt(); if (r) openPages(r[0], r[1], 0, k.split("||")[1]); };
