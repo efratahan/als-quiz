@@ -127,10 +127,14 @@ details.topics[open] summary::after{content:"▴"}
 footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
 @media (max-width:620px){.parts{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.parts{grid-template-columns:1fr}.part{flex-direction:row;justify-content:space-between;align-items:baseline}}
+#gosite{display:block;margin-bottom:14px;padding:10px 14px;border-radius:10px;background:var(--yellow-soft);color:var(--ink);text-decoration:none;font-size:15px}
+#gosite[hidden]{display:none}
+#gosite b{color:var(--green);direction:ltr;unicode-bidi:isolate}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
 <div class="wrap" dir="rtl" lang="he">
+  <a id="gosite" hidden href="https://efratahan.github.io/als-quiz/" target="_blank" rel="noopener">עברנו לאתר — שם ההתקדמות נשמרת בטלפון. <b>efratahan.github.io/als-quiz</b></a>
   <header>
     <div class="eyebrow">ספר פרוטוקולים ALS · מהדורת אפריל 2024 · תרופות בית: עדכון 31/10/2020</div>
     <h1>חזרת פרוטוקולים ALS</h1>
@@ -170,7 +174,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
   <footer>
     <span id="saved"></span>
-    <span id="ver">גרסה 14.10.2026 21:58</span>
+    <span id="ver">גרסה 14.10.2026 22:02</span>
     <span>פרוטוקולים ותרופות: ספר הפרוטוקולים של אגף הרפואה, אפריל 2024. גודל האמפולות, הקטעים המצולמים והעמודים המלאים מתוך העותק עם ההערות "מגיע", אחרי בדיקה מול תוויות התכשירים. תרופות בית: הרשימה המעודכנת ל־31/10/2020; "צהוב" = מסומן בצהוב ברשימה.</span>
     <span>בכל ספק הספר קובע — מקור ועמוד מופיעים בכל תשובה. בטלפון: תפריט הדפדפן ← "הוספה למסך הבית" כדי לפתוח כמו אפליקציה.</span>
   </footer>
@@ -465,6 +469,7 @@ document.addEventListener("keydown", e=>{
   else if (answered && e.key==="Enter"){ e.preventDefault(); next(); }
 });
 document.getElementById("restart").onclick = () => start(true);
+document.getElementById("gosite").hidden = !PAGEBUNDLE;   // only the claude.ai copy points people to the site
 renderTopics(); start(); showSaved();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
