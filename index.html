@@ -130,6 +130,10 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 #gosite{display:block;margin-bottom:14px;padding:10px 14px;border-radius:10px;background:var(--yellow-soft);color:var(--ink);text-decoration:none;font-size:15px}
 #gosite[hidden]{display:none}
 #gosite b{color:var(--green);direction:ltr;unicode-bidi:isolate}
+#moved{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;text-align:center}
+#moved>div{max-width:420px;display:flex;flex-direction:column;gap:14px;align-items:center}
+#moved a.next{text-decoration:none;display:inline-block}
+#moved .url{direction:ltr;color:var(--muted);margin:0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -174,7 +178,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
   <footer>
     <span id="saved"></span>
-    <span id="ver">גרסה 14.10.2026 22:06</span>
+    <span id="ver">גרסה 14.10.2026 22:09</span>
     <span>פרוטוקולים ותרופות: ספר הפרוטוקולים של אגף הרפואה, אפריל 2024. גודל האמפולות, הקטעים המצולמים והעמודים המלאים מתוך העותק עם ההערות "מגיע", אחרי בדיקה מול תוויות התכשירים. תרופות בית: הרשימה המעודכנת ל־31/10/2020; "צהוב" = מסומן בצהוב ברשימה.</span>
     <span>בכל ספק הספר קובע — מקור ועמוד מופיעים בכל תשובה. בטלפון: תפריט הדפדפן ← "הוספה למסך הבית" כדי לפתוח כמו אפליקציה.</span>
   </footer>
@@ -479,6 +483,15 @@ document.getElementById("clearmiss").onclick = e => {
   pool().forEach(d=>delete store.miss[d.id]); saveRound(null); start(true);
 };
 document.getElementById("gosite").hidden = !PAGEBUNDLE;   // only the claude.ai copy points people to the site
+if (PAGEBUNDLE){   // claude.ai copy: send people to the site (progress is not kept reliably in the claude.ai frame)
+  const SITE = "https://efratahan.github.io/als-quiz/";
+  try { window.top.location.href = SITE; } catch(e){}
+  const mv = document.createElement("div"); mv.id = "moved"; mv.dir = "rtl";
+  mv.innerHTML = `<div><h2>החידון עבר לאתר</h2><p>באתר ההתקדמות נשמרת בטלפון, ואפשר להוסיף אותו למסך הבית.</p><a class="next" href="${SITE}" target="_top">מעבר לאתר</a><p class="url">efratahan.github.io/als-quiz</p><button class="linkbtn" id="stayhere">להמשיך כאן בכל זאת</button></div>`;
+  document.body.appendChild(mv);
+  mv.querySelector("a").onclick = e => { try { window.top.location.href = SITE; e.preventDefault(); } catch(_){ try { if (window.open(SITE, "_blank")) e.preventDefault(); } catch(__){} } };
+  document.getElementById("stayhere").onclick = () => mv.remove();
+}
 renderTopics(); start(); showSaved();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
