@@ -65,6 +65,8 @@ details.topics[open] summary::after{content:"▴"}
 .tiles{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .tile{font:inherit;font-size:14px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 .tile i{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums;margin-inline-start:4px}
+.tile.fin{border-color:var(--green)}
+.tile.fin i{color:var(--green);font-weight:700}
 .tile[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
 .tile[aria-pressed="true"] i{color:#fff}
 [hidden]{display:none!important}
@@ -168,7 +170,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
   <footer>
     <span id="saved"></span>
-    <span id="ver">גרסה 11.10.2026 21:09</span>
+    <span id="ver">גרסה 14.10.2026 21:58</span>
     <span>פרוטוקולים ותרופות: ספר הפרוטוקולים של אגף הרפואה, אפריל 2024. גודל האמפולות, הקטעים המצולמים והעמודים המלאים מתוך העותק עם ההערות "מגיע", אחרי בדיקה מול תוויות התכשירים. תרופות בית: הרשימה המעודכנת ל־31/10/2020; "צהוב" = מסומן בצהוב ברשימה.</span>
     <span>בכל ספק הספר קובע — מקור ועמוד מופיעים בכל תשובה. בטלפון: תפריט הדפדפן ← "הוספה למסך הבית" כדי לפתוח כמו אפליקציה.</span>
   </footer>
@@ -301,7 +303,8 @@ function renderTopics(){
   const cur = topicOf();
   const okSet = store.ok || {};
   const count = sel => { const m = members(sel).filter(d=>!d.info), k = m.filter(d=>okSet[d.id]).length; return k ? `✓${k}/${m.length}` : m.length; };
-  const tile = (val,label) => `<button class="tile" data-t="${esc(val)}" aria-pressed="${val===cur}">${esc(label)}<i>${count(val)}</i></button>`;
+  const fin = val => { const r = (store.round||{})[part+"|"+val+"|all"]; return r && r.fin; };
+  const tile = (val,label) => `<button class="tile${fin(val)?" fin":""}" data-t="${esc(val)}" aria-pressed="${val===cur}">${esc(label)}<i>${fin(val)?"הושלם · ":""}${count(val)}</i></button>`;
   let html;
   if (part==="prot"){
     const isSide = ch => DATA.some(d=>d.part==="prot"&&d.ch===ch&&d.side);
@@ -333,6 +336,7 @@ const roundKey = () => part + "|" + (part==="smart" ? "" : topicOf()) + "|" + mo
 function saveRound(q){
   store.round = store.round || {};
   if (q && q.length) store.round[roundKey()] = {q, t:total, d:done, r:right, a:[...again], ts:Date.now()};
+  else if (total) store.round[roundKey()] = {q:[], t:total, d:done, r:right, a:[], fin:1, ts:Date.now()};   // finished: remembered until a new round starts
   else delete store.round[roundKey()];
   const ks = Object.keys(store.round);   // keep the 25 most recent rounds
   if (ks.length > 25) ks.sort((a,b)=>store.round[a].ts-store.round[b].ts).slice(0, ks.length-25).forEach(k=>delete store.round[k]);
@@ -340,7 +344,9 @@ function saveRound(q){
 }
 function start(fresh){
   const sv = !fresh && store.round && store.round[roundKey()];
-  if (sv && sv.q && sv.q.length && sv.q.every(id=>BYID[id])){
+  if (sv && sv.fin){
+    queue = []; total = sv.t; done = sv.d; right = sv.r; again.clear();
+  } else if (sv && sv.q && sv.q.length && sv.q.every(id=>BYID[id])){
     queue = sv.q.slice(); total = sv.t; done = sv.d; right = sv.r; again = new Set(sv.a||[]);
   } else {
     again.clear(); queue = shuffle(pool().map(d=>d.id)); total = queue.length; done = 0; right = 0;
@@ -355,9 +361,9 @@ function next(){
     const inPart = new Set((part==="prot" ? members("").concat(members("side")) : members("")).map(d=>d.id));
     const nm = Object.keys(store.miss).filter(id=>inPart.has(id)).length;
     card.innerHTML = total
-      ? `<div class="done"><div class="big">${right}/${total}</div><div>נכון בניסיון הראשון (${Math.round(100*right/total)}%)</div><button class="next" id="again">סבב נוסף</button>${nm&&mode!=="miss"?`<button class="linkbtn" id="gomiss" style="align-self:center">תרגול הטעויות בלבד (${nm})</button>`:""}</div>`
+      ? `<div class="done"><div style="font-weight:700">סיימת את הסבב ✓</div><div class="big">${right}/${total}</div><div>נכון בניסיון הראשון (${Math.round(100*right/total)}%)</div><button class="next" id="again">סבב נוסף</button>${nm&&mode!=="miss"?`<button class="linkbtn" id="gomiss" style="align-self:center">תרגול הטעויות בלבד (${nm})</button>`:""}</div>`
       : `<div class="done"><div>${mode==="miss"?"אין טעויות פתוחות בחלק הזה.":"אין שאלות בבחירה הזו."}</div><button class="next" id="again">לכל השאלות</button></div>`;
-    saveRound(null);
+    saveRound([]);
     if (part==="smart") renderWeak(); else renderTopics();
     document.getElementById("again").onclick = () => { if(!total){ mode="all"; } start(true); };
     const gm = document.getElementById("gomiss"); if (gm) gm.onclick = () => { mode="miss"; start(); };
