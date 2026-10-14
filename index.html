@@ -162,7 +162,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
     </div>
   </div>
 
-  <div class="progress"><span id="count"></span><div class="bar"><i id="barfill"></i></div><span id="score"></span><button class="linkbtn" id="restart" style="align-self:center">התחל מחדש</button></div>
+  <div class="progress"><span id="count"></span><div class="bar"><i id="barfill"></i></div><span id="score"></span><button class="linkbtn" id="restart" style="align-self:center">התחל מחדש</button><button class="linkbtn" id="clearmiss" hidden style="align-self:center">נקה את הטעויות</button></div>
   <button class="linkbtn" id="readprot" hidden>קרא את הפרוטוקול בספר</button>
 
   <section class="card" id="card" aria-live="polite"></section>
@@ -174,7 +174,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
   <footer>
     <span id="saved"></span>
-    <span id="ver">גרסה 14.10.2026 22:02</span>
+    <span id="ver">גרסה 14.10.2026 22:06</span>
     <span>פרוטוקולים ותרופות: ספר הפרוטוקולים של אגף הרפואה, אפריל 2024. גודל האמפולות, הקטעים המצולמים והעמודים המלאים מתוך העותק עם ההערות "מגיע", אחרי בדיקה מול תוויות התכשירים. תרופות בית: הרשימה המעודכנת ל־31/10/2020; "צהוב" = מסומן בצהוב ברשימה.</span>
     <span>בכל ספק הספר קובע — מקור ועמוד מופיעים בכל תשובה. בטלפון: תפריט הדפדפן ← "הוספה למסך הבית" כדי לפתוח כמו אפליקציה.</span>
   </footer>
@@ -355,7 +355,11 @@ function start(fresh){
   } else {
     again.clear(); queue = shuffle(pool().map(d=>d.id)); total = queue.length; done = 0; right = 0;
   }
-  renderParts(); showRead(); next();
+  renderParts(); showRead(); showClear(); next();
+}
+function showClear(){    // only in "my mistakes": wipe the mistakes of the current selection (two taps)
+  const b = document.getElementById("clearmiss"); b.dataset.arm = ""; b.textContent = "נקה את הטעויות";
+  b.hidden = !(mode==="miss" && part!=="smart" && pool().length);
 }
 function next(){
   answered = false;
@@ -469,6 +473,11 @@ document.addEventListener("keydown", e=>{
   else if (answered && e.key==="Enter"){ e.preventDefault(); next(); }
 });
 document.getElementById("restart").onclick = () => start(true);
+document.getElementById("clearmiss").onclick = e => {
+  const b = e.currentTarget;
+  if (!b.dataset.arm){ b.dataset.arm = "1"; b.textContent = `למחוק ${pool().length} טעויות? לחצי שוב`; return; }
+  pool().forEach(d=>delete store.miss[d.id]); saveRound(null); start(true);
+};
 document.getElementById("gosite").hidden = !PAGEBUNDLE;   // only the claude.ai copy points people to the site
 renderTopics(); start(); showSaved();
 </script>
