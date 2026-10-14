@@ -475,7 +475,7 @@ document.addEventListener("keydown", e=>{
 document.getElementById("restart").onclick = () => start(true);
 document.getElementById("clearmiss").onclick = e => {
   const b = e.currentTarget;
-  if (!b.dataset.arm){ b.dataset.arm = "1"; b.textContent = `למחוק ${pool().length} טעויות? לחצי שוב`; return; }
+  if (!b.dataset.arm){ b.dataset.arm = "1"; b.textContent = `למחוק ${pool().length} טעויות? ללחוץ שוב לאישור`; return; }
   pool().forEach(d=>delete store.miss[d.id]); saveRound(null); start(true);
 };
 document.getElementById("gosite").hidden = !PAGEBUNDLE;   // only the claude.ai copy points people to the site
